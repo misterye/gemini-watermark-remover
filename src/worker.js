@@ -5,13 +5,19 @@ export default {
         // Get password from environment variable
         const APP_PASSWORD = env.APP_PASSWORD;
 
-        // If APP_PASSWORD is not set or empty, allow all requests
-        if (!APP_PASSWORD) {
-            return fetch(request);
-        }
-
-        // Logic for authentication endpoint
+        // Handle Auth API
         if (url.pathname === '/api/auth') {
+            // If APP_PASSWORD is not set, allow access
+            if (!APP_PASSWORD) {
+                return new Response(JSON.stringify({ success: true, note: 'No password set' }), {
+                    headers: { 'Content-Type': 'application/json' }
+                });
+            }
+
+            if (request.method === 'OPTIONS') {
+                return new Response(null, { status: 204 });
+            }
+
             if (request.method !== 'POST') {
                 return new Response(JSON.stringify({ error: 'Method not allowed' }), {
                     status: 405,
@@ -31,14 +37,14 @@ export default {
                     headers: { 'Content-Type': 'application/json' }
                 });
             } catch (err) {
-                return new Response(JSON.stringify({ error: 'Invalid body' }), {
+                return new Response(JSON.stringify({ error: 'Invalid request' }), {
                     status: 400,
                     headers: { 'Content-Type': 'application/json' }
                 });
             }
         }
 
-        // Default: proxy to the static assets (standard ESA behavior)
-        return fetch(request);
+        // Default: Return static asset
+        return env.ASSETS ? await env.ASSETS.fetch(request) : fetch(request);
     }
 };
