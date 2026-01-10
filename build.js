@@ -5,7 +5,7 @@ import { execSync } from 'child_process';
 
 const require = createRequire(import.meta.url);
 const pkg = require('./package.json');
-const isProd = process.env.NODE_ENV === 'production';
+const isProd = process.env.NODE_ENV === 'production' || process.argv.includes('--prod');
 
 let _commitHash = null;
 const getCommitHash = () => {
