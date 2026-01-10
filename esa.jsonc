@@ -1,5 +1,6 @@
 {
     "name": "gemini-watermark-remover",
+    "entry": "./dist/worker.js",
     "assets": {
         "directory": "./dist",
         "notFoundStrategy": "404Page"

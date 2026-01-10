@@ -1,5 +1,9 @@
 {
   "title": "Gemini Watermark Remover - Gemini 无损去水印工具",
+  "login.title": "访问受限",
+  "login.subtitle": "请输入密码以继续使用",
+  "login.btn": "验证密码",
+  "login.error": "密码错误，请重试",
   "header.title": "Gemini Watermark Remover",
   "nav.userscript": "安装油猴脚本",
   "nav.principle": "去水印原理",

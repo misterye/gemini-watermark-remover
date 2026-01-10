@@ -33,8 +33,61 @@ async function init() {
     try {
         await i18n.init();
         setupLanguageSwitch();
-        showLoading(i18n.t('status.loading'));
 
+        if (await checkAuth()) {
+            startApp();
+        }
+    } catch (error) {
+        hideLoading();
+        console.error('initialize error:', error);
+    }
+}
+
+async function checkAuth() {
+    const isAuth = localStorage.getItem('app_authenticated') === 'true';
+    if (isAuth) return true;
+
+    const overlay = document.getElementById('loginOverlay');
+    const form = document.getElementById('loginForm');
+    const input = document.getElementById('passwordInput');
+    const errorEl = document.getElementById('loginError');
+
+    overlay.classList.remove('hidden');
+
+    return new Promise((resolve) => {
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const password = input.value;
+
+            try {
+                const res = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    localStorage.setItem('app_authenticated', 'true');
+                    overlay.classList.add('hidden');
+                    resolve(true);
+                } else {
+                    errorEl.classList.remove('hidden');
+                }
+            } catch (err) {
+                console.error('Auth check failed:', err);
+                // If the worker is not deployed yet or returns error, we might want to handle it
+                // For now, assume failure if endpoint exists but fails
+                errorEl.textContent = 'Auth service unavailable';
+                errorEl.classList.remove('hidden');
+            }
+        };
+    });
+}
+
+async function startApp() {
+    try {
+        showLoading(i18n.t('status.loading'));
         engine = await WatermarkEngine.create();
 
         hideLoading();
@@ -47,7 +100,7 @@ async function init() {
         })
     } catch (error) {
         hideLoading();
-        console.error('initialize error:', error);
+        console.error('startApp error:', error);
     }
 }
 
@@ -255,7 +308,7 @@ async function processQueue() {
                         const statusEl = document.getElementById(`status-${item.id}`);
                         if (statusEl) statusEl.innerHTML += `<p class="inline-block mt-1 text-xs md:text-sm text-warn">${status}</p>`;
                     }
-                }).catch(() => {});
+                }).catch(() => { });
             } catch (error) {
                 item.status = 'error';
                 updateStatus(item.id, i18n.t('status.failed'));

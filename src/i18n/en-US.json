@@ -1,5 +1,9 @@
 {
   "title": "Gemini Watermark Remover - Lossless Watermark Removal Tool",
+  "login.title": "Access Restricted",
+  "login.subtitle": "Please enter password to continue",
+  "login.btn": "Verify Password",
+  "login.error": "Incorrect password, please try again",
   "header.title": "Gemini Watermark Remover",
   "nav.userscript": "Install Userscript for Gemini",
   "nav.principle": "How It Works?",

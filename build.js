@@ -78,6 +78,17 @@ const websiteCtx = await esbuild.context({
   plugins: [copyAssetsPlugin],
 });
 
+// Build worker
+const workerCtx = await esbuild.context({
+  ...commonConfig,
+  entryPoints: ['src/worker.js'],
+  outfile: 'dist/worker.js',
+  platform: 'node',
+  format: 'esm',
+  target: ['es2020'],
+  minify: isProd,
+});
+
 // Build userscript
 const userscriptCtx = await esbuild.context({
   ...commonConfig,
@@ -92,13 +103,13 @@ console.log(`🚀 Starting build process... [${isProd ? 'PRODUCTION' : 'DEVELOPM
 
 if (existsSync('dist')) rmSync('dist', { recursive: true });
 mkdirSync('dist/userscript', { recursive: true });
-  
+
 if (isProd) {
-  await Promise.all([websiteCtx.rebuild(), userscriptCtx.rebuild()]);
+  await Promise.all([websiteCtx.rebuild(), userscriptCtx.rebuild(), workerCtx.rebuild()]);
   console.log('✅ Build complete!');
   process.exit(0);
 } else {
-  await Promise.all([websiteCtx.watch(), userscriptCtx.watch()]);
+  await Promise.all([websiteCtx.watch(), userscriptCtx.watch(), workerCtx.watch()]);
 
   const watchDir = (dir, dest) => {
     let debounceTimer = null;
