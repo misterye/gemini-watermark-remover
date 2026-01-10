@@ -1,0 +1,9 @@
+{
+    "name": "gemini-watermark-remover",
+    "assets": {
+        "directory": "./dist",
+        "notFoundStrategy": "404Page"
+    },
+    "buildCommand": "npm run build",
+    "installCommand": "npm install"
+}
