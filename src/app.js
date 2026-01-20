@@ -1,11 +1,10 @@
-import { WatermarkEngine } from './core/watermarkEngine.js';
 import i18n from './i18n.js';
 import { loadImage, checkOriginal, getOriginalStatus, setStatusMessage, showLoading, hideLoading } from './utils.js';
 import JSZip from 'jszip';
 import mediumZoom from 'medium-zoom';
 
 // global state
-let engine = null;
+let worker = null;
 let imageQueue = [];
 let processedCount = 0;
 let zoom = null;
@@ -76,8 +75,6 @@ async function checkAuth() {
                 }
             } catch (err) {
                 console.error('Auth check failed:', err);
-                // If the worker is not deployed yet or returns error, we might want to handle it
-                // For now, assume failure if endpoint exists but fails
                 errorEl.textContent = 'Auth service unavailable';
                 errorEl.classList.remove('hidden');
             }
@@ -85,10 +82,26 @@ async function checkAuth() {
     });
 }
 
+function initWorker() {
+    return new Promise((resolve, reject) => {
+        worker = new Worker('image.worker.js');
+        worker.onmessage = (e) => {
+            if (e.data.type === 'init' && e.data.success) {
+                resolve();
+            }
+        };
+        worker.onerror = reject;
+        worker.postMessage({ type: 'init' });
+    });
+}
+
 async function startApp() {
     try {
         showLoading(i18n.t('status.loading'));
-        engine = await WatermarkEngine.create();
+        await initWorker();
+
+        // Listen for worker messages
+        worker.onmessage = handleWorkerMessage;
 
         hideLoading();
         setupEventListeners();
@@ -102,6 +115,81 @@ async function startApp() {
         hideLoading();
         console.error('startApp error:', error);
     }
+}
+
+function handleWorkerMessage(e) {
+    const { type, payload } = e.data;
+
+    if (type === 'process') {
+        const { id, blob, originalSize } = payload;
+        const item = imageQueue.find(i => i.id === id);
+        if (!item) return;
+
+        item.processedBlob = blob;
+        item.processedUrl = URL.createObjectURL(blob);
+
+        if (imageQueue.length === 1) {
+            handleSingleProcessed(item, originalSize);
+        } else {
+            handleMultiProcessed(item, originalSize);
+        }
+    } else if (type === 'getInfo') {
+        const { id, info } = payload;
+        const item = imageQueue.find(i => i.id === id);
+        if (!item) return;
+
+        if (imageQueue.length === 1) {
+            originalInfo.innerHTML = `
+                <p>${i18n.t('info.size')}: ${item.originalImg.width}×${item.originalImg.height}</p>
+                <p>${i18n.t('info.watermark')}: ${info.size}×${info.size}</p>
+                <p>${i18n.t('info.position')}: (${info.position.x},${info.position.y})</p>
+            `;
+        }
+    } else if (type === 'error') {
+        const { id } = payload;
+        console.error('Worker error for id', id, payload.message);
+        if (id) {
+            const item = imageQueue.find(i => i.id === id);
+            if (item) {
+                item.status = 'error';
+                updateStatus(item.id, i18n.t('status.failed'));
+            }
+        }
+    }
+}
+
+function handleSingleProcessed(item, originalSize) {
+    processedImage.src = item.processedUrl;
+    processedSection.style.display = 'block';
+    downloadBtn.style.display = 'flex';
+    downloadBtn.onclick = () => downloadImage(item);
+
+    processedInfo.innerHTML = `
+        <p>${i18n.t('info.size')}: ${originalSize.width}×${originalSize.height}</p>
+        <p>${i18n.t('info.status')}: ${i18n.t('info.removed')}</p>
+    `;
+
+    zoom.detach();
+    zoom.attach('[data-zoomable]');
+    processedSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function handleMultiProcessed(item, originalSize) {
+    document.getElementById(`result-${item.id}`).src = item.processedUrl;
+    item.status = 'completed';
+
+    // We can't get sync info anymore, so we rely on what we might have or wait for a separate info message if needed.
+    // For simplicity, in multi-mode, we update status to simply "Completed" or similar if details aren't critical,
+    // OR we request info from worker earlier.
+    // In this refactor, let's request info right before processing.
+
+    const downloadBtn = document.getElementById(`download-${item.id}`);
+    downloadBtn.classList.remove('hidden');
+    downloadBtn.onclick = () => downloadImage(item);
+
+    processedCount++;
+    updateProgress();
+    updateStatus(item.id, i18n.t('info.removed'));
 }
 
 /**
@@ -147,6 +235,7 @@ function setupEventListeners() {
 function reset() {
     singlePreview.style.display = 'none';
     multiPreview.style.display = 'none';
+    processedSection.style.display = 'none';
     imageQueue = [];
     processedCount = 0;
     fileInput.value = '';
@@ -209,32 +298,20 @@ async function processSingle(item) {
 
         originalImage.src = img.src;
 
-        const watermarkInfo = engine.getWatermarkInfo(img.width, img.height);
-        originalInfo.innerHTML = `
-            <p>${i18n.t('info.size')}: ${img.width}×${img.height}</p>
-            <p>${i18n.t('info.watermark')}: ${watermarkInfo.size}×${watermarkInfo.size}</p>
-            <p>${i18n.t('info.position')}: (${watermarkInfo.position.x},${watermarkInfo.position.y})</p>
-        `;
+        // Request info from worker
+        worker.postMessage({
+            type: 'getInfo',
+            payload: { id: item.id, width: img.width, height: img.height }
+        });
 
-        const result = await engine.removeWatermarkFromImage(img);
-        const blob = await new Promise(resolve => result.toBlob(resolve, 'image/png'));
-        item.processedBlob = blob;
+        // Send to worker for processing
+        // We need ImageBitmap for transfer
+        const imageBitmap = await createImageBitmap(item.file);
+        worker.postMessage({
+            type: 'process',
+            payload: { id: item.id, imageBitmap }
+        }, [imageBitmap]);
 
-        item.processedUrl = URL.createObjectURL(blob);
-        processedImage.src = item.processedUrl;
-        processedSection.style.display = 'block';
-        downloadBtn.style.display = 'flex';
-        downloadBtn.onclick = () => downloadImage(item);
-
-        processedInfo.innerHTML = `
-            <p>${i18n.t('info.size')}: ${img.width}×${img.height}</p>
-            <p>${i18n.t('info.status')}: ${i18n.t('info.removed')}</p>
-        `;
-
-        zoom.detach();
-        zoom.attach('[data-zoomable]');
-
-        processedSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (error) {
         console.error(error);
     }
@@ -272,52 +349,46 @@ async function processQueue() {
         zoom.attach(`#result-${item.id}`);
     }));
 
-    const concurrency = 3;
-    for (let i = 0; i < imageQueue.length; i += concurrency) {
-        await Promise.all(imageQueue.slice(i, i + concurrency).map(async item => {
-            if (item.status !== 'pending') return;
+    // In worker mode, we can just dump them all to the worker, 
+    // the worker queue (JS event loop) will handle them one by one or in parallel depending on browser implementation,
+    // but a single worker is single-threaded.
+    // To avoid freezing the transfer, we can limit concurrency of *sending* messages if needed,
+    // but sending messages is fast.
 
-            item.status = 'processing';
-            updateStatus(item.id, i18n.t('status.processing'));
+    for (const item of imageQueue) {
+        if (item.status !== 'pending') continue;
 
-            try {
-                const result = await engine.removeWatermarkFromImage(item.originalImg);
-                const blob = await new Promise(resolve => result.toBlob(resolve, 'image/png'));
-                item.processedBlob = blob;
+        item.status = 'processing';
+        updateStatus(item.id, i18n.t('status.processing'));
 
-                item.processedUrl = URL.createObjectURL(blob);
-                document.getElementById(`result-${item.id}`).src = item.processedUrl;
+        try {
+            checkOriginal(item.originalImg).then(({ is_google, is_original }) => {
+                if (!is_google || !is_original) {
+                    const status = getOriginalStatus({ is_google, is_original });
+                    const statusEl = document.getElementById(`status-${item.id}`);
+                    if (statusEl) statusEl.innerHTML += `<p class="inline-block mt-1 text-xs md:text-sm text-warn">${status}</p>`;
+                }
+            }).catch(() => { });
 
-                item.status = 'completed';
-                const watermarkInfo = engine.getWatermarkInfo(item.originalImg.width, item.originalImg.height);
+            const imageBitmap = await createImageBitmap(item.file);
+            worker.postMessage({
+                type: 'process',
+                payload: { id: item.id, imageBitmap }
+            }, [imageBitmap]);
 
-                updateStatus(item.id, `<p>${i18n.t('info.size')}: ${item.originalImg.width}×${item.originalImg.height}</p>
-            <p>${i18n.t('info.watermark')}: ${watermarkInfo.size}×${watermarkInfo.size}</p>
-            <p>${i18n.t('info.position')}: (${watermarkInfo.position.x},${watermarkInfo.position.y})</p>`, true);
-
-                const downloadBtn = document.getElementById(`download-${item.id}`);
-                downloadBtn.classList.remove('hidden');
-                downloadBtn.onclick = () => downloadImage(item);
-
-                processedCount++;
-                updateProgress();
-
-                checkOriginal(item.originalImg).then(({ is_google, is_original }) => {
-                    if (!is_google || !is_original) {
-                        const status = getOriginalStatus({ is_google, is_original });
-                        const statusEl = document.getElementById(`status-${item.id}`);
-                        if (statusEl) statusEl.innerHTML += `<p class="inline-block mt-1 text-xs md:text-sm text-warn">${status}</p>`;
-                    }
-                }).catch(() => { });
-            } catch (error) {
-                item.status = 'error';
-                updateStatus(item.id, i18n.t('status.failed'));
-                console.error(error);
-            }
-        }));
+        } catch (error) {
+            item.status = 'error';
+            updateStatus(item.id, i18n.t('status.failed'));
+            console.error(error);
+        }
     }
 
-    if (processedCount > 0) {
+    // Note: Concurrency control is less critical here since we offloaded to worker, 
+    // but if we had multiple workers we could balance load.
+    // For now, simpler loop is fine.
+
+    if (imageQueue.length > 0) {
+        // We don't know when they finish exactly here, relying on callback
         downloadAllBtn.style.display = 'flex';
     }
 }

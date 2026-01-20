@@ -89,6 +89,18 @@ const workerCtx = await esbuild.context({
   minify: isProd,
 });
 
+// Build browser worker
+const imageWorkerCtx = await esbuild.context({
+  ...commonConfig,
+  entryPoints: ['src/image.worker.js'],
+  outfile: 'dist/image.worker.js',
+  platform: 'browser',
+  format: 'iife', // Browser workers work best with iife or esm, iife is safer for broad compat here
+  target: ['es2020'],
+  minify: isProd,
+});
+
+
 // Build userscript
 const userscriptCtx = await esbuild.context({
   ...commonConfig,
@@ -99,17 +111,42 @@ const userscriptCtx = await esbuild.context({
   minify: false
 });
 
+// Build terms page script
+const termsCtx = await esbuild.context({
+  ...commonConfig,
+  entryPoints: ['src/terms.js'],
+  outfile: 'dist/terms.js',
+  platform: 'browser',
+  target: ['es2020'],
+  banner: { js: jsBanner },
+  sourcemap: !isProd,
+  plugins: [],
+});
+
+
 console.log(`🚀 Starting build process... [${isProd ? 'PRODUCTION' : 'DEVELOPMENT'}]`);
 
 if (existsSync('dist')) rmSync('dist', { recursive: true });
 mkdirSync('dist/userscript', { recursive: true });
 
 if (isProd) {
-  await Promise.all([websiteCtx.rebuild(), userscriptCtx.rebuild(), workerCtx.rebuild()]);
+  await Promise.all([
+    websiteCtx.rebuild(),
+    userscriptCtx.rebuild(),
+    workerCtx.rebuild(),
+    imageWorkerCtx.rebuild(),
+    termsCtx.rebuild()
+  ]);
   console.log('✅ Build complete!');
   process.exit(0);
 } else {
-  await Promise.all([websiteCtx.watch(), userscriptCtx.watch(), workerCtx.watch()]);
+  await Promise.all([
+    websiteCtx.watch(),
+    userscriptCtx.watch(),
+    workerCtx.watch(),
+    imageWorkerCtx.watch(),
+    termsCtx.watch()
+  ]);
 
   const watchDir = (dir, dest) => {
     let debounceTimer = null;

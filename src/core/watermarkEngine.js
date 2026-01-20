@@ -8,6 +8,33 @@ import { removeWatermark } from './blendModes.js';
 import BG_48_PATH from '../assets/bg_48.png';
 import BG_96_PATH from '../assets/bg_96.png';
 
+const isWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+function createCanvas(width, height) {
+    if (typeof OffscreenCanvas !== 'undefined') {
+        return new OffscreenCanvas(width, height);
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    return canvas;
+}
+
+async function loadImageAsset(path) {
+    if (isWorker) {
+        const response = await fetch(path);
+        const blob = await response.blob();
+        return await createImageBitmap(blob);
+    } else {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+            img.src = path;
+        });
+    }
+}
+
 /**
  * Detect watermark configuration based on image size
  * @param {number} imageWidth - Image width
@@ -62,20 +89,9 @@ export class WatermarkEngine {
     }
 
     static async create() {
-        const bg48 = new Image();
-        const bg96 = new Image();
-
-        await Promise.all([
-            new Promise((resolve, reject) => {
-                bg48.onload = resolve;
-                bg48.onerror = reject;
-                bg48.src = BG_48_PATH;
-            }),
-            new Promise((resolve, reject) => {
-                bg96.onload = resolve;
-                bg96.onerror = reject;
-                bg96.src = BG_96_PATH;
-            })
+        const [bg48, bg96] = await Promise.all([
+            loadImageAsset(BG_48_PATH),
+            loadImageAsset(BG_96_PATH)
         ]);
 
         return new WatermarkEngine({ bg48, bg96 });
@@ -96,9 +112,7 @@ export class WatermarkEngine {
         const bgImage = size === 48 ? this.bgCaptures.bg48 : this.bgCaptures.bg96;
 
         // Create temporary canvas to extract ImageData
-        const canvas = document.createElement('canvas');
-        canvas.width = size;
-        canvas.height = size;
+        const canvas = createCanvas(size, size);
         const ctx = canvas.getContext('2d');
         ctx.drawImage(bgImage, 0, 0);
 
@@ -120,9 +134,7 @@ export class WatermarkEngine {
      */
     async removeWatermarkFromImage(image) {
         // Create canvas to process image
-        const canvas = document.createElement('canvas');
-        canvas.width = image.width;
-        canvas.height = image.height;
+        const canvas = createCanvas(image.width, image.height);
         const ctx = canvas.getContext('2d');
 
         // Draw original image onto canvas
