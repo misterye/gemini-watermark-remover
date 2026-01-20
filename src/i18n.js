@@ -9,10 +9,17 @@ const i18n = {
   },
 
   async loadTranslations(locale) {
-    const res = await fetch(`/i18n/${locale}.json?_=${Date.now()}`);
-    this.translations = await res.json();
-    this.locale = locale;
-    localStorage.setItem('locale', locale);
+    try {
+      const res = await fetch(`/i18n/${locale}.json?_=${Date.now()}`);
+      if (!res.ok) throw new Error(`Failed to load ${locale} translations: ${res.status}`);
+      this.translations = await res.json();
+      this.locale = locale;
+      localStorage.setItem('locale', locale);
+    } catch (err) {
+      console.error('i18n load error:', err);
+      // Fallback to empty translations to prevent total crash
+      this.translations = this.translations || {};
+    }
   },
 
   t(key) {

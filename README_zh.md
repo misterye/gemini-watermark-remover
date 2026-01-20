@@ -85,6 +85,20 @@ pnpm build
 pnpm serve
 ```
 
+## Vercel 部署
+
+本项目已针对 Vercel 进行了优化。
+
+1. 将代码推送到 GitHub。
+2. 在 Vercel 中导入项目。
+3. **重要配置项**：
+   - **Framework Preset**: Other (或 None)
+   - **Build Command**: `node build.js --prod`
+   - **Output Directory**: `dist`
+4. **身份验证 (可选)**：
+   - 如果你想为你的实例设置访问密码，请在 Vercel 设置中添加环境变量 `APP_PASSWORD`。如果不设置，应用将公开访问。
+
+
 ## 算法原理
 
 ### Gemini 添加水印的方式

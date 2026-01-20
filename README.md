@@ -70,8 +70,6 @@ A high-performance, 100% client-side tool for removing Gemini AI watermarks. Bui
 4. Navigate to Gemini conversation pages.
 5. Click "Copy Image" or "Download Image" to remove the watermark.
 
-## Development
-
 ```bash
 # Install dependencies
 pnpm install
@@ -85,6 +83,20 @@ pnpm build
 # Local preview
 pnpm serve
 ```
+
+## Vercel Deployment
+
+This project is optimized for Vercel. 
+
+1. Push the code to GitHub.
+2. Import the project in Vercel.
+3. **Important Configuration**:
+   - **Framework Preset**: Other (or None)
+   - **Build Command**: `node build.js --prod`
+   - **Output Directory**: `dist`
+4. **Authentication (Optional)**:
+   - Add an environment variable `APP_PASSWORD` in Vercel settings if you want to protect your instance with a password. If not set, the app will be publicly accessible.
+
 
 ## How it Works
 
