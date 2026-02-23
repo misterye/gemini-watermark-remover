@@ -23,7 +23,7 @@
   "nav.userscript": "Install Userscript for Gemini",
   "nav.principle": "How It Works?",
   "main.title": "Gemini Eraser",
-  "main.subtitle": "Based on reverse alpha blending algorithm, pure browser-side processing, Free, Fast, and Lossless",
+  "main.subtitle": "Pure browser-side processing, Free, Fast, and Lossless",
   "upload.text": "Click to select or drag images here",
   "upload.hint": "Supports JPG, PNG, WebP",
   "step.1": "Select Original Image",
