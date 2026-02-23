@@ -24,6 +24,7 @@ const originalInfo = document.getElementById('originalInfo');
 const processedInfo = document.getElementById('processedInfo');
 const downloadBtn = document.getElementById('downloadBtn');
 const resetBtn = document.getElementById('resetBtn');
+const startGuideBtn = document.getElementById('startGuideBtn');
 
 /**
  * initialize the application
@@ -187,6 +188,59 @@ function setupEventListeners() {
 
     downloadAllBtn.addEventListener('click', downloadAll);
     resetBtn.addEventListener('click', reset);
+
+    if (startGuideBtn) {
+        startGuideBtn.addEventListener('click', startTour);
+    }
+}
+
+let driverObj = null;
+
+function startTour() {
+    const config = {
+        showProgress: true,
+        animate: true,
+        allowClose: true,
+        doneBtnText: i18n.t('tour.done'),
+        nextBtnText: i18n.t('tour.next'),
+        prevBtnText: i18n.t('tour.prev'),
+        steps: [
+            {
+                element: '#uploadBoxCenter',
+                popover: {
+                    title: i18n.t('tour.upload.title'),
+                    description: i18n.t('tour.upload.desc'),
+                    side: 'bottom',
+                    align: 'center'
+                }
+            },
+            {
+                element: '#downloadBtn',
+                popover: {
+                    title: i18n.t('tour.download.title'),
+                    description: i18n.t('tour.download.desc'),
+                    side: 'left',
+                    align: 'start'
+                }
+            }
+        ]
+    };
+
+    if (!driverObj) {
+        driverObj = window.driver.js.driver(config);
+    } else {
+        driverObj.setConfig(config);
+        driverObj.setSteps(config.steps);
+    }
+
+    // Scroll to the workspace area
+    const workspace = document.getElementById('workspace');
+    if (workspace) {
+        workspace.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => driverObj.drive(), 500);
+    } else {
+        driverObj.drive();
+    }
 }
 
 function reset() {

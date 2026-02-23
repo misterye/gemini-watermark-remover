@@ -62,5 +62,19 @@
   "info.removed": "Watermark Removed",
   "original.not_gemini": "⚠️ This image may not be made with Gemini. Lossless processing unavailable.",
   "original.not_original": "⚠️ This image may not be original size. Lossless processing unavailable.",
-  "original.pass": "✅ This image made with Gemini. Lossless processing supported."
+  "original.pass": "✅ This image made with Gemini. Lossless processing supported.",
+  "step.1.title": "Upload Images",
+  "step.1.desc": "Drag and drop single or multiple Gemini AI images with transparent watermarks.",
+  "step.2.title": "Auto Processing",
+  "step.2.desc": "Ultra-fast reverse Alpha blending algorithm running locally to instantly strip watermarks.",
+  "step.3.title": "Lossless Save",
+  "step.3.desc": "Preview clean images and download individually or export in bulk losslessly.",
+  "btn.startGuide": "Start Experience Now",
+  "tour.upload.title": "Step 1: Upload Images",
+  "tour.upload.desc": "Click here or drag your Gemini AI images into the dashed box to start processing.",
+  "tour.download.title": "Step 2: Download Result",
+  "tour.download.desc": "Once processed, the clean image will appear here. Click download to save it locally!",
+  "tour.done": "Got it",
+  "tour.next": "Next",
+  "tour.prev": "Previous"
 }

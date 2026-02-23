@@ -62,5 +62,19 @@
   "info.removed": "水印已移除",
   "original.not_gemini": "⚠️ 此图片非 Gemini 生成的原始图片，可能无法进行无损去水印",
   "original.not_original": "⚠️ 此图片非原始尺寸，可能无法进行无损去水印",
-  "original.pass": "✅ 此图片为 Gemini 生成的原始图片，可进行无损去水印"
+  "original.pass": "✅ 此图片为 Gemini 生成的原始图片，可进行无损去水印",
+  "step.1.title": "上传图片",
+  "step.1.desc": "支持单张或多张拖拽，仅限原本含有透明水印的 Gemini AI 图像",
+  "step.2.title": "自动解析",
+  "step.2.desc": "本地反向 Alpha 混合算法极速处理，瞬间剥离数字水印层",
+  "step.3.title": "无损保存",
+  "step.3.desc": "预览清晰的无水印原图，支持单张下载或批量无损打包导出",
+  "btn.startGuide": "立即开始体验",
+  "tour.upload.title": "第一步：上传图片",
+  "tour.upload.desc": "点击这里或将你的 Gemini AI 图像拖拽到虚线框内即可开始处理。",
+  "tour.download.title": "第二步：下载结果",
+  "tour.download.desc": "处理完成后，你的无水印图片会自动显示在这里。点击下载即可保存到本地！",
+  "tour.done": "明白",
+  "tour.next": "下一步",
+  "tour.prev": "上一步"
 }

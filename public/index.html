@@ -139,6 +139,84 @@
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
     }
 
+    /* Driver.js Custom Theme */
+    .driver-popover.driverjs-theme {
+      background-color: #0F172A;
+      color: #F8FAFC;
+      border-radius: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+      font-family: var(--font-body);
+      padding: 20px;
+    }
+
+    .driver-popover.driverjs-theme .driver-popover-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #fff;
+      font-family: var(--font-heading);
+    }
+
+    .driver-popover.driverjs-theme .driver-popover-description {
+      color: #94A3B8;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      margin-top: 8px;
+    }
+
+    .driver-popover.driverjs-theme .driver-popover-footer {
+      margin-top: 16px;
+    }
+
+    .driver-popover.driverjs-theme .driver-popover-progress-text {
+      color: #64748B;
+      font-size: 0.8rem;
+    }
+
+    .driver-popover.driverjs-theme button {
+      border: none;
+      background-color: #334155;
+      color: #fff;
+      border-radius: 0.5rem;
+      padding: 6px 14px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-shadow: none;
+      transition: all 0.2s;
+    }
+
+    .driver-popover.driverjs-theme button:hover {
+      background-color: #475569;
+    }
+
+    .driver-popover.driverjs-theme .driver-popover-navigation-btns {
+      gap: 8px;
+    }
+
+    .driver-popover.driverjs-theme .driver-popover-next-btn {
+      background-color: #4F46E5;
+    }
+
+    .driver-popover.driverjs-theme .driver-popover-next-btn:hover {
+      background-color: #4338CA;
+    }
+
+    .driver-popover.driverjs-theme .driver-popover-arrow-side-left.driver-popover-arrow {
+      border-left-color: #0F172A;
+    }
+
+    .driver-popover.driverjs-theme .driver-popover-arrow-side-right.driver-popover-arrow {
+      border-right-color: #0F172A;
+    }
+
+    .driver-popover.driverjs-theme .driver-popover-arrow-side-top.driver-popover-arrow {
+      border-top-color: #0F172A;
+    }
+
+    .driver-popover.driverjs-theme .driver-popover-arrow-side-bottom.driver-popover-arrow {
+      border-bottom-color: #0F172A;
+    }
+
     /* Modern Card Hover */
     .tech-card {
       transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -189,6 +267,7 @@
       backdrop-filter: blur(4px);
     }
   </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css" />
 </head>
 
 <body
@@ -220,23 +299,146 @@
   </header>
 
   <main class="flex-grow">
-    <section class="relative pt-20 pb-16 lg:pt-32 lg:pb-24 text-center px-4 overflow-hidden">
+    <section class="relative pt-20 pb-16 lg:pt-24 lg:pb-16 text-center px-4 overflow-hidden">
       <!-- Decorative Elements -->
       <div
         class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-100/30 rounded-full blur-[100px] -z-10 animate-pulse">
       </div>
 
-
-
       <h2 class="text-4xl md:text-7xl font-bold text-gray-900 mb-6 tracking-tight leading-tight animate-in delay-100"
         data-i18n="main.title">
         Gemini AI 图像去水印
       </h2>
-      <p class="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-12 font-light leading-relaxed animate-in delay-200"
+      <p class="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-16 font-light leading-relaxed animate-in delay-200"
         data-i18n="main.subtitle">
         基于反向 Alpha 混合算法，纯浏览器本地处理，免费、极速、无损
       </p>
 
+      <!-- Hero Demo -->
+      <div
+        class="max-w-3xl mx-auto mb-4 relative rounded-2xl overflow-hidden shadow-[0_10px_40px_-10px_rgba(79,70,229,0.2)] border border-gray-100/50 bg-gray-50 aspect-[2.5/1] animate-in delay-300 pointer-events-none select-none">
+
+        <!-- Before Image (Base) -->
+        <img src="before.webp" alt="Before processing"
+          class="absolute inset-0 w-full h-full object-cover object-bottom" />
+
+        <!-- After Image (Wipe layer) -->
+        <img src="after.webp" alt="After processing"
+          class="absolute inset-0 w-full h-full object-cover object-bottom z-10"
+          style="animation: wipe-image 3.5s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;" />
+
+        <!-- Edge & Glow Layer -->
+        <div class="absolute inset-0 z-20"
+          style="animation: wipe-bar-container 3.5s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;">
+          <div
+            class="absolute right-0 top-0 bottom-0 w-[2px] bg-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.8)] z-30">
+          </div>
+          <div class="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-r from-transparent to-emerald-400/20 z-20">
+          </div>
+        </div>
+
+        <style>
+          @keyframes wipe-image {
+
+            0%,
+            15% {
+              clip-path: inset(0 100% 0 0);
+            }
+
+            85%,
+            100% {
+              clip-path: inset(0 0 0 0);
+            }
+          }
+
+          @keyframes wipe-bar-container {
+
+            0%,
+            15% {
+              transform: translateX(-100%);
+            }
+
+            85%,
+            100% {
+              transform: translateX(0%);
+            }
+          }
+        </style>
+      </div>
+    </section>
+
+    <!-- 3 Step Cards -->
+    <section class="max-w-5xl mx-auto px-4 mb-16 relative z-10">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 text-center animate-in delay-300">
+
+        <!-- Card 1 -->
+        <div
+          class="bg-white rounded-3xl p-6 shadow-sm hover:shadow-glow transition-all duration-300 border border-gray-100 hover:border-indigo-200 group relative overflow-hidden">
+          <div
+            class="w-16 h-16 mx-auto bg-indigo-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform">
+            <svg class="w-8 h-8 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+            </svg>
+          </div>
+          <div
+            class="absolute top-4 left-4 w-8 h-8 rounded-full bg-gray-50 text-gray-400 font-bold flex items-center justify-center text-sm border border-gray-100">
+            1</div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2" data-i18n="step.1.title">上传图片</h3>
+          <p class="text-sm text-gray-500" data-i18n="step.1.desc">支持单张或多张拖拽，仅限原本含有透明水印的 Gemini AI 图像</p>
+        </div>
+
+        <!-- Card 2 -->
+        <div
+          class="bg-white rounded-3xl p-6 shadow-sm hover:shadow-glow transition-all duration-300 border border-gray-100 hover:border-emerald-200 group relative overflow-hidden">
+          <div
+            class="w-16 h-16 mx-auto bg-emerald-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:-rotate-3 transition-transform">
+            <svg class="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z">
+              </path>
+            </svg>
+          </div>
+          <div
+            class="absolute top-4 left-4 w-8 h-8 rounded-full bg-gray-50 text-gray-400 font-bold flex items-center justify-center text-sm border border-gray-100">
+            2</div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2" data-i18n="step.2.title">自动解析</h3>
+          <p class="text-sm text-gray-500" data-i18n="step.2.desc">本地反向 Alpha 混合算法极速处理，瞬间剥离数字水印层</p>
+        </div>
+
+        <!-- Card 3 -->
+        <div
+          class="bg-white rounded-3xl p-6 shadow-sm hover:shadow-glow transition-all duration-300 border border-gray-100 hover:border-purple-200 group relative overflow-hidden">
+          <div
+            class="w-16 h-16 mx-auto bg-purple-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform">
+            <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
+          </div>
+          <div
+            class="absolute top-4 left-4 w-8 h-8 rounded-full bg-gray-50 text-gray-400 font-bold flex items-center justify-center text-sm border border-gray-100">
+            3</div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2" data-i18n="step.3.title">无损保存</h3>
+          <p class="text-sm text-gray-500" data-i18n="step.3.desc">预览清晰的无水印原图，支持单张下载或批量无损打包导出</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Start Button -->
+    <div class="text-center mb-24 animate-in delay-300">
+      <button id="startGuideBtn"
+        class="px-8 py-4 bg-gray-900 hover:bg-black text-white text-lg rounded-2xl font-bold transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 flex items-center mx-auto gap-3">
+        <span data-i18n="btn.startGuide">立即开始体验</span>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Main Workspace -->
+    <section id="workspace" class="scroll-mt-24 px-4 pb-24">
       <div
         class="max-w-5xl mx-auto bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-3 border border-gray-100 animate-in delay-300">
         <div id="uploadArea"
@@ -244,7 +446,7 @@
 
           <div class="absolute inset-0 bg-grid-pattern opacity-5 pointer-events-none"></div>
 
-          <div class="flex flex-col items-center justify-center pt-5 pb-6 z-10">
+          <div id="uploadBoxCenter" class="flex flex-col items-center justify-center pt-5 pb-6 z-10">
             <div
               class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-lg mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 border border-indigo-50">
               <svg class="w-10 h-10 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -258,32 +460,6 @@
               支持 JPG, PNG, WebP</p>
           </div>
           <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" multiple class="hidden" />
-        </div>
-      </div>
-    </section>
-
-    <section class="max-w-6xl mx-auto px-4 mb-8 md:mb-20">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-10 text-center">
-        <div
-          class="step-item relative bg-white h-16 md:h-24 flex items-center justify-start px-6 md:pl-16 rounded-lg md:rounded-none md:first:rounded-l-lg md:last:rounded-r-lg shadow-sm border border-gray-100">
-          <div
-            class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 font-bold flex items-center justify-center mr-3 text-sm">
-            1</div>
-          <span class="font-medium flex-1 md:flex-none text-gray-800" data-i18n="step.1">选择原始图片</span>
-        </div>
-        <div
-          class="step-item relative bg-white h-16 md:h-24 flex items-center justify-start px-6 md:pl-16 rounded-lg md:rounded-none shadow-sm border border-gray-100 border-l-0">
-          <div
-            class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 font-bold flex items-center justify-center mr-3 text-sm">
-            2</div>
-          <span class="font-medium flex-1 md:flex-none text-gray-800" data-i18n="step.2">自动解析</span>
-        </div>
-        <div
-          class="step-item relative bg-white h-16 md:h-24 flex items-center justify-start px-6 md:pl-16 rounded-lg md:rounded-none md:last:rounded-r-lg shadow-sm border border-gray-100 border-l-0">
-          <div
-            class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 font-bold flex items-center justify-center mr-3 text-sm">
-            3</div>
-          <span class="font-medium flex-1 md:flex-none text-gray-800" data-i18n="step.3">保存无水印图</span>
         </div>
       </div>
     </section>
@@ -451,6 +627,7 @@
 
 
 
+  <script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
   <script src="app.js"></script>
 </body>
 
