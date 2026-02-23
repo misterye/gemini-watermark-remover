@@ -32,74 +32,11 @@ async function init() {
     try {
         await i18n.init();
         setupLanguageSwitch();
-
-        if (await checkAuth()) {
-            startApp();
-        }
+        startApp();
     } catch (error) {
         hideLoading();
         console.error('initialize error:', error);
     }
-}
-
-async function checkAuth() {
-    console.log('Checking authentication...');
-    const isAuth = localStorage.getItem('app_authenticated') === 'true';
-    if (isAuth) {
-        console.log('Authenticated via localStorage');
-        return true;
-    }
-
-    const overlay = document.getElementById('loginOverlay');
-    const form = document.getElementById('loginForm');
-    const input = document.getElementById('passwordInput');
-    const errorEl = document.getElementById('loginError');
-
-    if (!overlay) {
-        console.error('Login overlay element not found');
-        return true; // Fallback to allow app if UI is missing
-    }
-
-    overlay.classList.remove('hidden');
-    console.log('Login overlay shown');
-
-    return new Promise((resolve) => {
-        form.onsubmit = async (e) => {
-            e.preventDefault();
-            const password = input.value;
-            console.log('Attempting login...');
-
-            try {
-                const res = await fetch('/api/auth', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password })
-                });
-
-                if (res.status === 404) {
-                    console.error('Auth API not found (404)');
-                    alert('Authentication service is not properly configured on this environment.');
-                    return;
-                }
-
-                const data = await res.json();
-                if (data.success) {
-                    console.log('Login successful');
-                    localStorage.setItem('app_authenticated', 'true');
-                    overlay.classList.add('hidden');
-                    resolve(true);
-                } else {
-                    console.warn('Login failed: Invalid password');
-                    errorEl.classList.remove('hidden');
-                    errorEl.textContent = i18n.t('login.error');
-                }
-            } catch (err) {
-                console.error('Auth check error:', err);
-                errorEl.textContent = 'Auth service unavailable: ' + err.message;
-                errorEl.classList.remove('hidden');
-            }
-        };
-    });
 }
 
 function initWorker() {
